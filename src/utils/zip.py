@@ -8,7 +8,7 @@ from typing import List
 from rarfile import RarFile
 
 from src.server import S3
-from src.utils import Stream, Funct
+from src.utils import Stream, Funct, File
 
 class Zip:
 
@@ -25,8 +25,9 @@ class Zip:
 
     @staticmethod
     def unzip_items_rar(source: str, destination: str, password: str = None, s3: bool = False) -> List[str]:
-        S3.upload_file(path=source, destination=destination+source.split('.')[-1]+'/'+source.split('/')[-1], send=s3)
-        path_items: List[str] = [destination+source.split('.')[-1]+'/'+source.split('/')[-1]]
+        destination_source: str = destination+File.get_format(source)+'/'+File.name_file(source)
+        S3.upload_file(path=source, destination=destination_source, send=s3)
+        path_items: List[str] = [destination_source]
 
         temp_dir: str = tempfile.mkdtemp()
         try:
@@ -40,10 +41,8 @@ class Zip:
             for file in files:
                 file_path = os.path.join(root, file).replace('\\', '/')
 
-                _, extension = os.path.splitext(file_path)
-
-                S3.upload_file(path=file_path, destination=destination+extension.replace('.', '')+'/'+file_path.split('/')[-1], send=s3)
-                new_path: str = Funct.copy(source=file_path, destination=destination+extension.replace('.', '')+'/'+file_path.split('/')[-1])
+                S3.upload_file(path=file_path, destination=destination+File.get_format(file_path)+'/'+File.name_file(file_path), send=s3)
+                new_path: str = Funct.copy(source=file_path, destination=destination+File.get_format(file_path)+'/'+File.name_file(file_path))
                 Stream.zip_stream('COPY', file_path, new_path, password)
                 path_items.append(new_path.replace('\\', '/'))
 

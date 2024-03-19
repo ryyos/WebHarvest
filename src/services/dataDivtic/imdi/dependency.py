@@ -44,7 +44,7 @@ class ImdiLibs(ImdiComponent):
         ...
 
     def build_path(self, provinsi: str) -> str:
-        return f'data/data_raw/Divtik/imdi/json/{Dekimashita.vdir(provinsi)}.json'
+        return f'data/data_raw/Divtik/imdi/{provinsi}/json/{Dekimashita.vdir(provinsi)}.json'
         ...
 
     async def extract(self, url: str, param: dict, provinsi: str) -> List[Dict[str, any]]:

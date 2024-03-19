@@ -61,3 +61,15 @@ class File:
     def list_dir(path: str) -> List[str]:
         return os.listdir(path)
         ...
+
+    @staticmethod
+    def get_format(path: str) -> str:
+        _, extension = os.path.splitext(path)
+        return extension.replace('.', '')
+        ...
+
+    @staticmethod
+    def name_file(path: str) -> str:
+        return os.path.basename(source)
+        ...
+

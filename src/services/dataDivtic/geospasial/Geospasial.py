@@ -16,8 +16,6 @@ class Geospasial(GeospasialLibs):
         html: PyQuery = PyQuery(response.text)
 
         async for row in self.collect_url(html):
-            ic(row["url"] in self.dones)
-            ic(row)
             if not row["url"] or row["url"] in self.dones: continue
             try:
                 asyncio.gather(self.process_data(row))
