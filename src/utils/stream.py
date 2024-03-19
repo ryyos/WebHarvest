@@ -52,3 +52,7 @@ class Stream:
        def found(process: str, message: int, total: int) -> None:
               logger.info(f'[ {style(process, fg="bright_green")} ] :: {style(f"{message}", fg="bright_blue")}: [ {total} ]')
               ...
+              
+       @staticmethod
+       def zip_stream(process: str, source: str, destination: str, password: str) -> None:
+              logger.info(f'[ {style(process, fg="bright_green")} ] :: {style("SOURCE", fg="bright_blue")}: [ {source} ] | {style("DESTINATION", fg="bright_blue")}: [ {destination} ] | {style("PASSWORD", fg="bright_blue")}: [ {password} ]')

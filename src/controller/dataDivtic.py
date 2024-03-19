@@ -31,3 +31,13 @@ class DataDivtic:
         asyncio.run(imdy.main())
 
         ...
+
+    @staticmethod
+    @task.command('geospasial')
+    @click.pass_context
+    def geospasial(ctx: Context) -> None:
+
+        geo = Geospasial(ctx.obj)
+        asyncio.run(geo.main())
+
+        ...

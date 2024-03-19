@@ -13,8 +13,8 @@ class ImdiLibs(ImdiComponent):
 
         self.__save: bool = options.get('save')
         self.__s3: bool = options.get('s3')
-
         self.api = ApiRetry(show_logs=True, defaulth_headers=True)
+        
         ...
 
     async def collect_provinsi(self, url: str, param: dict) -> AsyncGenerator[Dict[str, str], any]:
