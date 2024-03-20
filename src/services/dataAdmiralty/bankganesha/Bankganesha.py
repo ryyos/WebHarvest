@@ -18,7 +18,7 @@ class Bankganesha(BankganeshaLibs):
 
     def chef(self, datas: Tuple[List[Dict[str, any]]]) -> None:
 
-        for type, data, url in zip(self.type, datas, self.target_url):
+        for type, data, url in zippy(self.type, datas, self.target_url):
             path: str = self.base_path+type+'_bankganesha.json'
             result = {
                 "link": url,

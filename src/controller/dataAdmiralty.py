@@ -180,3 +180,33 @@ class DataAdmiralty:
         qnb = Qnb(ctx.obj)
         qnb.main()
         ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('bankmega')
+    @click.pass_context
+    def bankmega(ctx: Context) -> None:
+
+        bankmega = Bankmega(ctx.obj)
+        bankmega.main()
+        ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('bankbsi')
+    @click.pass_context
+    def bankbsi(ctx: Context) -> None:
+
+        bankbsi = Bankbsi(ctx.obj)
+        bankbsi.main()
+        ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('kbbukopinsyariah')
+    @click.pass_context
+    def kbbukopinsyariah(ctx: Context) -> None:
+
+        kbbukopinsyariah = Kbbukopinsyariah(ctx.obj)
+        kbbukopinsyariah.main()
+        ...

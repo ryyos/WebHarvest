@@ -52,6 +52,7 @@ class File:
     @staticmethod
     def read_list_json(path: str):
         Dir.create_dir(paths='/'.join(path.split('/')[:-1]))
+        if os.path.exists(path): File.write_json(path, [])
         with open(path) as f:
             data = f.read()
         return json.loads(data)
@@ -70,6 +71,6 @@ class File:
 
     @staticmethod
     def name_file(path: str) -> str:
-        return os.path.basename(source)
+        return os.path.basename(path)
         ...
 

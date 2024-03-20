@@ -20,7 +20,7 @@ class Boiindonesia(BoiindonesiaLibs):
 
     async def chef(self, datas: Tuple[List[Dict[str, any]]]) -> None:
 
-        for type, data in zip(self.type, datas):
+        for type, data in zippy(self.type, datas):
             path: str = self.base_path+type+'_boiindonesia.json'
             result = {
                 "link": self.target_url,

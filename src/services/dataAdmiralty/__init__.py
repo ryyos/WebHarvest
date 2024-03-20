@@ -14,3 +14,6 @@ from .banksinarmas.Banksinarmas import Banksinarmas
 from .bankganesha.Bankganesha import Bankganesha
 from .icbc.Icbc import Icbc
 from .qnb.Qnb import Qnb
+from .bankmega.Bankmega import Bankmega
+from .bankbsi.Bankbsi import Bankbsi
+from .kbbukopinsyariah.Kbbukopinsyariah import Kbbukopinsyariah

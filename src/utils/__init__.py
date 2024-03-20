@@ -7,4 +7,4 @@ from .data_manipulation import split_list
 from .annotations  import Annotations
 from .DataStream import DataStream
 from .functions import Funct
-from .zip import Zip
+from .zippy import Zip
