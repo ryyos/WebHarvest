@@ -4,9 +4,9 @@ from typing import List, Dict, Tuple
 from pyquery import PyQuery
 from icecream import ic
 
-from .component import KbbukopinsyariahComponent
+from .component import HanabankComponent
 
-class KbbukopinsyariahLibs(KbbukopinsyariahComponent):
+class HanabankLibs(HanabankComponent):
     def __init__(self) -> None:
         super().__init__()
 

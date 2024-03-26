@@ -17,3 +17,6 @@ from .qnb.Qnb import Qnb
 from .bankmega.Bankmega import Bankmega
 from .bankbsi.Bankbsi import Bankbsi
 from .kbbukopinsyariah.Kbbukopinsyariah import Kbbukopinsyariah
+from .mncbank.Mncbank import Mncbank
+from .megasyariah.Megasyariah import Megasyariah
+from .bankindex.Bankindex import Bankindex

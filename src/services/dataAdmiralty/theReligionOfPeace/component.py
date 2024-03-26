@@ -15,4 +15,5 @@ class TheReligionOfPeaceComponent:
 
         self.path_all = 'data/kafka/admiralty/theReligionOfPeace/all/json/'
         self.path_stream = 'data/kafka/admiralty/theReligionOfPeace/stream/json/'
+        self.path_custom = 'data/kafka/admiralty/theReligionOfPeace/customize/json/'
         ...

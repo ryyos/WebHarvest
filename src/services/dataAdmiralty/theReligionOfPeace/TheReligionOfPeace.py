@@ -14,16 +14,21 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
     def __init__(self, options: Dict[str, bool]) -> None:
         super().__init__(options)
 
+        ic(options)
+
         self.all: bool = options.get('all')
         self.__save: bool = options.get('save')
         self.__kafka: bool = options.get('kafka')
+        self.__customize: bool = options.get('custom')
+        self.__year: str = options.get('year')
+        self.__url: str = options.get('url')
         ...
 
     def extract(self, url: str, year: str, stream: bool) -> None:
         response: Response = self.api.get(url=url, max_retries=30)
         html = PyQuery(response.text)
 
-        tables: List[dict] = self.extract_table(html, stream=stream)
+        tables: List[dict] = self.extract_table(html, stream=stream, customize=self.__customize)
 
         for table in tables:
             Stream.found(
@@ -50,9 +55,15 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
                 path: str = self.path_stream+year
                 path: str = f'{Dir.create_dir(path)}/{Time.epoch()}.json'
 
+            elif self.__customize:
+                path: str = self.path_custom+year
+                path: str = f'{Dir.create_dir(path)}/{str(Time.epoch_ms())}.json'
+
             else:
                 path: str = self.path_all+year
                 path: str = f'{Dir.create_dir(path)}/{str(Time.epoch_ms())}.json'
+
+
 
             if self.__save:
                 File.write_json(path, results)
@@ -69,8 +80,12 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
 
     def main(self) -> None:
 
-        for year, url in self.collect_year(self.main_url):
-            self.extract(url=url, year=year, stream=bool(not self.all))
+        if self.__customize:
+            self.extract(self.__url, self.__year, False)
 
-            if not self.all: break
-            ...
+        else:
+            for year, url in self.collect_year(self.main_url):
+                self.extract(url=url, year=year, stream=bool(not self.all))
+
+                if not self.all: break
+                ...

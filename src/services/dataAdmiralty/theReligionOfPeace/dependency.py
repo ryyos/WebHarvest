@@ -17,6 +17,8 @@ class TheReligionOfPeaceLibs(TheReligionOfPeaceComponent):
         super().__init__()
 
         self.__no_update: bool = options.get('no_update')
+        self.__start: str = options.get('start')
+        self.__end: str = options.get('end') if options.get('end') else Time.today()
 
         self.api = ApiRetry(
             show_logs=True,
@@ -106,7 +108,22 @@ class TheReligionOfPeaceLibs(TheReligionOfPeaceComponent):
         return new_datas
         ...
 
-    def extract_table(self, html: PyQuery, stream: bool) -> List[Dict[str, any]]:
+    def customize_tables(self, tables: List[dict]) -> List[Dict[str, any]]:
+        new_datas: List[dict] = []
+        for table in tables:
+            dates: str = table["Date"].replace('.', '-')
+            dates: int = Time.convert_time(dates)
+
+            if dates >= int(Time.convert_time(self.__start)) and dates <= int(Time.convert_time(self.__end)):
+                new_datas.append(table)
+        
+        if not self.__no_update:
+            self.update_database(stream_time=Time.convert_time(tables[0]["Date"].replace('.', '-')))
+            
+        return new_datas
+        ...
+
+    def extract_table(self, html: PyQuery, stream: bool, customize: bool) -> List[Dict[str, any]]:
 
         table = html.find('table[cellpadding="3px"]')
         header = PyQuery(table).find('tr:first-child th')
@@ -119,6 +136,11 @@ class TheReligionOfPeaceLibs(TheReligionOfPeaceComponent):
 
         if stream:
             return self.stream_tables(tables)
+        
+        if customize:
+            return self.customize_tables(tables)
+        
+
 
         return tables
         ...

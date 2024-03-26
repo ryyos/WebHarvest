@@ -56,6 +56,11 @@ class DataAdmiralty:
     @task.command('trop', help='The Religion OfP eace')
     @click.option('--all', '-a', is_flag=True, default=False, help='want to stream or take all')
     @click.option('--no-update', '-no', is_flag=True, default=False, help='Update date stream or not')
+    @click.option('--custom', '-c', is_flag=True, default=False)
+    @click.option('--url', '-no')
+    @click.option('--year', '-yr')
+    @click.option('--start', '-st')
+    @click.option('--end', '-e')
     @click.pass_context
     def trop(ctx: Context, **kwargs) -> None:
 
@@ -209,4 +214,34 @@ class DataAdmiralty:
 
         kbbukopinsyariah = Kbbukopinsyariah(ctx.obj)
         kbbukopinsyariah.main()
+        ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('mncbank')
+    @click.pass_context
+    def mncbank(ctx: Context) -> None:
+
+        mncbank = Mncbank(ctx.obj)
+        mncbank.main()
+        ...
+        
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('megasyariah')
+    @click.pass_context
+    def megasyariah(ctx: Context) -> None:
+
+        megasyariah = Megasyariah(ctx.obj)
+        megasyariah.main()
+        ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('bankindex')
+    @click.pass_context
+    def bankindex(ctx: Context) -> None:
+
+        bankindex = Bankindex(ctx.obj)
+        bankindex.main()
         ...

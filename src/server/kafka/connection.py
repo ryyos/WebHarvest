@@ -14,10 +14,10 @@ class ConnectionKafka:
                 self.__kafka_configuration.get('bootstrap_servers_1'), 
                 self.__kafka_configuration.get('bootstrap_servers_2'),
                 self.__kafka_configuration.get('bootstrap_servers_3')])
+            return self.kafka_produser
         except Exception:
             ...
 
-        return self.kafka_produser
         ...
 
 

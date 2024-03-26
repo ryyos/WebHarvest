@@ -1,29 +1,27 @@
-import asyncio
-import requests
 
+from typing import List, Dict, Tuple
 from requests import Response
 from pyquery import PyQuery
 from icecream import ic
-from typing import List, Dict, Tuple, AsyncGenerator
 
+from .dependency import HanabankLibs
 from src.utils import *
 from src.server import S3
 
-from .dependency import BoiindonesiaLibs
-
-class Boiindonesia(BoiindonesiaLibs):
+class Hanabank(HanabankLibs):
     def __init__(self, options: Dict[str, bool]) -> None:
         super().__init__()
+
         self.__s3: bool = options.get('s3')
         self.__save: bool = options.get('save')
         ...
 
-    async def chef(self, datas: Tuple[List[Dict[str, any]]]) -> None:
+    def chef(self, datas: Tuple[List[Dict[str, any]]]) -> None:
 
-        for type, data in zip(self.type, datas):
-            path: str = self.base_path+type+'_boiindonesia.json'
+        for type, data, url in zip(self.type, datas, self.target_url):
+            path: str = self.base_path+type+'_kbbukopinsyariah.json'
             result = {
-                "link": self.target_url,
+                "link": url,
                 "type": type,
                 "domain": self.domain,
                 "tags": [self.domain],
@@ -37,25 +35,23 @@ class Boiindonesia(BoiindonesiaLibs):
             if self.__save:
                 File.write_json(path, result)
 
-            S3.upload_json(
-            destination=path,
-            body=result,
-            send=self.__s3
+            if self.__s3:
+                S3.upload_json(
+                destination=path,
+                body=result,
+                send=self.__s3
             )
 
-    @Annotations.stopwatch
-    async def main(self) -> None:
+    def main(self) -> None:
         response: Response = self.api.get(self.target_url)
         html = PyQuery(response.text)
 
         results_direksi: List[dict] = []
         results_komisaris: List[dict] = []
 
-        async for profile in self.sorter(html):
-            if profile["type"] == 'komisaris':
-                results_komisaris.extend(await asyncio.gather(self.extract(profile["html"])))
-            if profile["type"] == 'direksi':
-                results_direksi.extend(await asyncio.gather(self.extract(profile["html"])))
+        divs: PyQuery = html.find('div[class="max-w-screen-xl mx-auto px-16 md:px-40 xl:px-32 2xl:px-0 mb-40 md:mb-96 overflow-hidden"] > div > div')
+        
+        self.extract(divs.eq(1))
 
-        await self.chef((results_direksi, results_komisaris))
+        # self.chef((results_direksi, results_komisaris))
         ...

@@ -18,6 +18,7 @@ class Kafkaa:
     def send(data: dict, topic: str = None) -> None:
         topic: str = topic if topic else settings.KAFKA_CONFIGURATIONS.get('topic')
         connection.send(topic=topic, value=str.encode(json.dumps(data)))
+        Stream.shareKafka(topic)
 
     @staticmethod
     def local2kafka(source: str) -> None:
