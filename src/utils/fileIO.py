@@ -52,7 +52,7 @@ class File:
     @staticmethod
     def read_list_json(path: str):
         Dir.create_dir(paths='/'.join(path.split('/')[:-1]))
-        if os.path.exists(path): File.write_json(path, [])
+        if not os.path.exists(path): File.write_json(path, [])
         with open(path) as f:
             data = f.read()
         return json.loads(data)

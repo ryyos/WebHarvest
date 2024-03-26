@@ -24,7 +24,8 @@ class DataIcc:
 
     @staticmethod
     @task.command('google-reviews')
-    @click.option('--query', '-q', required=True, help='insert Query')
+    @click.option('--url', '-u', required=True, help='insert url')
+    @click.option('--worker', '-u', required=True, help='insert count worker')
     @click.pass_context
     def google(ctx: Context, **kwargs) -> None:
 

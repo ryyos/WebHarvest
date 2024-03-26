@@ -14,8 +14,8 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
     def __init__(self, options: Dict[str, bool]) -> None:
         super().__init__()
 
-        self.query: str = options["query"]
         self.topic: str = options.get('topic', None)
+        self.dones: List[str] = File.read_list_json('src/database/json/google_review.json')
         ...
 
     def vfree(self, text: str) -> str:
@@ -31,12 +31,13 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             return text
 
     async def completed_not_yet(self, id: str) -> bool:
-        
+        if id in self.dones: return True
+        else: return False
         ...
 
-    async def collect_hotel(self, browser: BrowserContext) -> AsyncGenerator[str, any]:
+    async def collect_hotel(self, browser: BrowserContext, url: str) -> AsyncGenerator[str, any]:
         base_page: Page = await browser.new_page()
-        await base_page.goto(url=self.base_query)
+        await base_page.goto(url=url)
 
         while True:
             hotels: List[any] = await base_page.query_selector_all('a[class="PVOOXe"]')
@@ -45,11 +46,13 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 yield self.google_url+await hotel.get_attribute('href')
 
             try:
-                await base_page.wait_for_selector('#id > c-wiz > c-wiz:nth-child(26) > div.eGUU7b > button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-INsAgc.VfPpkd-LgbsSe-OWXEXe-Bz112c-UbuQg.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.Rj2Mlf.OLiIxf.PDpWxe.LQeN7.my6Xrf.wJjnG.dA7Fcf.tEQgl > span')
-                next: Locator = await base_page.query_selector('#id > c-wiz > c-wiz:nth-child(26) > div.eGUU7b > button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-INsAgc.VfPpkd-LgbsSe-OWXEXe-Bz112c-UbuQg.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.Rj2Mlf.OLiIxf.PDpWxe.LQeN7.my6Xrf.wJjnG.dA7Fcf.tEQgl > span')
+                await base_page.wait_for_selector('//*[@id="id"]')
+                next: Locator = await base_page.query_selector('button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-INsAgc.VfPpkd-LgbsSe-OWXEXe-Bz112c-UbuQg.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.Rj2Mlf.OLiIxf.PDpWxe.LQeN7.my6Xrf.wJjnG.dA7Fcf.tEQgl')
+                ic(not next)
                 if not next: break
+
                 await next.click()
-            except Exception:
+            except Exception as err:
                 break
         await base_page.close()
         ...
@@ -78,7 +81,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 "thumbnail": val(PyQuery(top).find('img[class="x7VXS I2nXKd"]').attr('data-src')),
                 "place": val(PyQuery(top).find('div.AFZtd').text()),
                 "rating": to_float(val(PyQuery(top).find('span.KFi5wf').text())),
-                "total_ratings": val(PyQuery(top).find('span.jdzyld').text()),
+                "total_ratings": to_int(Dekimashita.vnum(val(PyQuery(top).find('span.jdzyld').text()))),
                 "location": val(PyQuery(top).find('div.bJlStd').text()),
                 "distance": val(PyQuery(top).find('span[class="kJW6fe"]').text()) or val(PyQuery(top).find('div[class="kC4Ofd NUiScc"]').text())
             })
@@ -132,33 +135,29 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         raw_fac: List[PyQuery] = [PyQuery(span).text() for span in html.find('section[class="O3oTUb pR0Q9b"] > div[class="hwR8Dd DmBmM fmFs0c"]').eq(-1).find('div[class="xGm0S B8PKdc XSe9p"]')]\
             + [PyQuery(span).text() for span in html.find('section[class="O3oTUb pR0Q9b"] > div[class="hwR8Dd DmBmM fmFs0c"]').eq(-1).find('div[class="xGm0S AOZSGb XSe9p"]')]
         
-        fasilitas: List[dict] = {str(index): value for index, value in enumerate(raw_fac)}
+        fasilitas: dict = {str(index): value for index, value in enumerate(raw_fac)}
         return fasilitas
         ...
 
     async def get_fasilitas_v2(self, html: PyQuery) -> Dict[str, any]:
 
-        fasilitas: List[dict] = []
-
-        for fac in html.find('div[class="eFfcqe G8T82"] div[class="IYmE3e"]'):
-            fasilitas.append({
-                PyQuery(fac).find('h4').text():
-                    {str(index): self.vfree(PyQuery(li).text()) for index, li in enumerate(PyQuery(fac).find('ul > li'))}
-            })
+        fasilitas = {
+            PyQuery(fac).find('h4').text():
+                {str(index): self.vfree(PyQuery(li).text()) for index, li in enumerate(PyQuery(fac).find('ul > li'))}
+        for fac in html.find('div[class="eFfcqe G8T82"] div[class="IYmE3e"]') }
 
         return fasilitas
         ...
 
     async def get_kesehatan(self, html: PyQuery) -> Dict[str, any]:
-        kesehatans: List[dict] = []
-        for div in html.find('section[class="mEKuwe G8T82"] > div[jscontroller="N4VHee"]'):
-            kesehatans.append({
-                PyQuery(div).find('h4').text():
-                    {str(index): PyQuery(li).text() for index, li in enumerate(PyQuery(div).find('ul > li'))}
-            })
-            ...
+        kesehatan = {
+            PyQuery(div).find('h4').text():
+                {str(index): PyQuery(li).text() for index, li in enumerate(PyQuery(div).find('ul > li'))}\
+            for div in html.find('section[class="mEKuwe G8T82"] > div[jscontroller="N4VHee"]')
+            }
+        ...
 
-        return kesehatans
+        return kesehatan
         ...
 
     async def get_photo_v1(self, page: Page) -> List[str]:
@@ -279,15 +278,12 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         bottom: bool = False
         scroll_height = await page.evaluate("document.body.scrollHeight")
         current_height = await page.evaluate("window.scrollY + window.innerHeight")
-        await page.locator('//*[@id="reviews"]/c-wiz/c-wiz/div/div/div/div/div[1]/div[1]').click()
+        await page.locator('//*[@id="reviews"]/c-wiz/c-wiz/div/div/div/div').click()
         index_done = 0
         while not bottom:
             html: PyQuery = PyQuery(await page.content())
             scroll_height = await page.evaluate("document.body.scrollHeight")
             current_height = await page.evaluate("window.scrollY + window.innerHeight")
-
-            ic(scroll_height)
-            ic(current_height)
 
             for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
                 index_done+=1
@@ -308,8 +304,8 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                     "tags_review": list(PyQuery(review).find('div[class="ThUm5b"]').text().split(' ❘ ')),
                     "content_reviews": PyQuery(review).find('div[class="STQFb eoY5cb"] div[class="K7oBsc"]').text(),
                     "reply_content_reviews": {
-                        "username_reply_reviews": "null",
-                        "content_reviews": "null"
+                        "username_reply_reviews": PyQuery(review).find('div.lU7Ape div.n7uVJf > span').eq(0).text(),
+                        "content_reviews": PyQuery(review).find('div.lU7Ape div.n7uVJf').text()
                     },
                     "media_reviews": [
                         PyQuery(img).find('img').attr('data-src') or PyQuery(img).find('img').attr('src') for img in PyQuery(review).find('div[class="fBMzfe"] div[jsname="o8HAFf"]')
@@ -332,28 +328,35 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         await page.goto(url)
         await sleep(5)
 
-        html: PyQuery = PyQuery(await page.content())
+        meta: dict = await self.metadata(url, page)
+
+        if await self.completed_not_yet(meta["id"]): raise Exception('done')
 
         result: dict = {
-            **await self.metadata(url, page),
-            "tempat_terdekat": await self.nearby_places(html.find('section[class="OEscc"]')),
+            **meta,
+            "tempat_terdekat": await self.nearby_places(page),
             "harga": await self.price(page),
             "tentang": await self.about(page),
             "foto": await self.photo(page),
             "reviews": await self.reviews_header(page)
         }
 
+        File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/detail/json/{Time.epoch_ms()}.json', result)
+
         async for review in self.reviews(page):
             result["reviews"].update(review)
-            File.write_json(f'data/data_raw/icc/google-reviews/json/{Time.epoch_ms()}.json', result)
+            File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{Time.epoch_ms()}.json', result)
         
+
+        self.dones.append(meta['id'])
+        File.write_json('src/database/json/google_review.json', self.dones)
         ...
 
     async def execute(self, url: str, browser: BrowserContext) -> None:
         page: Page = await browser.new_page()
         try:
             await self.extract_hotel(url, page)
-        except Exception:
+        except Exception as err:
             ...
         finally:
             await page.close()
