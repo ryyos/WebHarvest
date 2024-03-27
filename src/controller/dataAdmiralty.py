@@ -255,3 +255,13 @@ class DataAdmiralty:
         hibank = Hibank(ctx.obj)
         hibank.main()
         ...
+        
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('ccb')
+    @click.pass_context
+    def ccb(ctx: Context) -> None:
+
+        ccb = Ccb(ctx.obj)
+        asyncio.run(ccb.main())
+        ...

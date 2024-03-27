@@ -21,3 +21,4 @@ from .mncbank.Mncbank import Mncbank
 from .megasyariah.Megasyariah import Megasyariah
 from .bankindex.Bankindex import Bankindex
 from .hibank.Hibank import Hibank
+from .ccb.Ccb import Ccb
