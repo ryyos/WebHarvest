@@ -265,3 +265,23 @@ class DataAdmiralty:
         ccb = Ccb(ctx.obj)
         asyncio.run(ccb.main())
         ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('dbs')
+    @click.pass_context
+    def dbs(ctx: Context) -> None:
+
+        dbs = Dbs(ctx.obj)
+        dbs.main()
+        ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('perdania')
+    @click.pass_context
+    def perdania(ctx: Context) -> None:
+
+        perdania = Perdania(ctx.obj)
+        asyncio.run(perdania.main())
+        ...

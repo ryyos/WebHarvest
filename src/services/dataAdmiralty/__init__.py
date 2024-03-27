@@ -22,3 +22,5 @@ from .megasyariah.Megasyariah import Megasyariah
 from .bankindex.Bankindex import Bankindex
 from .hibank.Hibank import Hibank
 from .ccb.Ccb import Ccb
+from .dbs.Dbs import Dbs
+from .perdania.Perdania import Perdania
