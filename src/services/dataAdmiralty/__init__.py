@@ -24,3 +24,4 @@ from .hibank.Hibank import Hibank
 from .ccb.Ccb import Ccb
 from .dbs.Dbs import Dbs
 from .perdania.Perdania import Perdania
+from .bankcapital.Bankcapital import Bankcapital

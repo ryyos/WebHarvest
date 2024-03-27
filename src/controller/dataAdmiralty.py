@@ -285,3 +285,13 @@ class DataAdmiralty:
         perdania = Perdania(ctx.obj)
         asyncio.run(perdania.main())
         ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('bankcapital')
+    @click.pass_context
+    def bankcapital(ctx: Context) -> None:
+
+        bankcapital = Bankcapital(ctx.obj)
+        bankcapital.main()
+        ...
