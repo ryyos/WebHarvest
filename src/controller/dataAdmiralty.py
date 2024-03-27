@@ -245,3 +245,13 @@ class DataAdmiralty:
         bankindex = Bankindex(ctx.obj)
         bankindex.main()
         ...
+
+    @staticmethod
+    @Annotations.stopwatch
+    @task.command('hibank')
+    @click.pass_context
+    def hibank(ctx: Context) -> None:
+
+        hibank = Hibank(ctx.obj)
+        hibank.main()
+        ...
