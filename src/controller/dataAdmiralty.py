@@ -287,7 +287,6 @@ class DataAdmiralty:
         ...
 
     @staticmethod
-    @Annotations.stopwatch
     @task.command('bankcapital')
     @click.pass_context
     def bankcapital(ctx: Context) -> None:
