@@ -26,6 +26,8 @@ class DataIcc:
     @task.command('google-reviews')
     @click.option('--url', '-u', required=True, help='insert url')
     @click.option('--worker', '-u', required=True, help='insert count worker')
+    @click.option('--topic', '-u', required=False, help='topic for kafka')
+    @click.option('--headless', '-u', is_flag=True, default=False, help='headless playwright or not')
     @click.pass_context
     def google(ctx: Context, **kwargs) -> None:
 

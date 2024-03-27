@@ -139,8 +139,6 @@ class TheReligionOfPeaceLibs(TheReligionOfPeaceComponent):
         
         if customize:
             return self.customize_tables(tables)
-        
-
 
         return tables
         ...

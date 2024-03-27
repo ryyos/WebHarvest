@@ -6,7 +6,8 @@ class TheReligionOfPeaceComponent:
     def __init__(self) -> None:
         load_dotenv()
 
-        self.main_url = 'https://www.thereligionofpeace.com/attacks/attacks.aspx?Yr=Last30'
+        # self.main_url = 'https://www.thereligionofpeace.com/attacks/attacks.aspx?Yr=Last30'
+        self.main_url = 'https://www.thereligionofpeace.com/attacks/attacks.aspx?Yr=2024'
         self.base_url = 'https://www.thereligionofpeace.com'
         self.base_media_url = 'https://www.thereligionofpeace.com/attacks/'
         self.domain = 'www.thereligionofpeace.com'

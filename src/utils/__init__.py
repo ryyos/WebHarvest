@@ -9,3 +9,4 @@ from .DataStream import DataStream
 from .functions import Funct
 from .zippy import Zip
 from .endecode import *
+from .casting import Casting

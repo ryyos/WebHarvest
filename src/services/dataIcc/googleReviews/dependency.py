@@ -14,8 +14,12 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
     def __init__(self, options: Dict[str, bool]) -> None:
         super().__init__()
 
-        self.topic: str = options.get('topic', None)
         self.dones: List[str] = File.read_list_json('src/database/json/google_review.json')
+
+        self.__topic: str = options["topic"]
+        self.__save: str = options["save"]
+        self.__kafka: str = options["kafka"]
+
         ...
 
     def vfree(self, text: str) -> str:
@@ -63,7 +67,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             "link": url,
             "id": Endecode.md5_hash(Dekimashita.valpha(html.find('title').eq(0).text())),
             "name": html.find('title').eq(0).text().split(' - ')[0],
-            "topic_kafka": self.topic,
+            "topic_kafka": self.__topic,
             "domain": self.domain,
             "tags": [self.domain],
             "crawling_time": Time.now(),
@@ -163,6 +167,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
     async def get_photo_v1(self, page: Page) -> List[str]:
         html: PyQuery = PyQuery(await page.content())
         photos: List[str] = ['https:'+PyQuery(img).attr('src') for img in html.find('div[jsname="TeyQfe"] img')]
+        Stream.found(process='PHOTO', message='FOUNDED', total=len(photos))
         return photos
         ...
 
@@ -174,8 +179,9 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 await button.click()
                 await sleep(5)
                 classe: str = await button.evaluate('(element) => element.getAttribute("class")')
-                break
                 if 'eLNT1d' in classe: break
+                html: PyQuery = PyQuery(await page.content())
+                Stream.found(process='PHOTO', message='FOUNDED', total=len(html.find('div[class="M3UVH"] img')))
             
         html: PyQuery = PyQuery(await page.content())
         return [self.check_url(PyQuery(img).attr('src')) for img in html.find('div[class="M3UVH"] img')]
@@ -287,6 +293,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
 
             for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
                 index_done+=1
+                Stream.found(process='REVIEWS', message='FOUNDED', total=index_done)
                 yield {
                     "id_review": Endecode.md5_hash(PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text()),
                     "username_reviews": PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text() \
@@ -341,15 +348,16 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             "reviews": await self.reviews_header(page)
         }
 
-        File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/detail/json/{Time.epoch_ms()}.json', result)
+        if self.__save:
+            File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/detail/json/{Time.epoch_ms()}.json', result)
 
         async for review in self.reviews(page):
             result["reviews"].update(review)
-            File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{Time.epoch_ms()}.json', result)
+            if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{Time.epoch_ms()}.json', result)
         
 
         self.dones.append(meta['id'])
-        File.write_json('src/database/json/google_review.json', self.dones)
+        if self.__save or self.__kafka: File.write_json('src/database/json/google_review.json', self.dones)
         ...
 
     async def execute(self, url: str, browser: BrowserContext) -> None:
@@ -357,6 +365,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         try:
             await self.extract_hotel(url, page)
         except Exception as err:
+            Stream.found(process='DONE', message='URL', total=url)
             ...
         finally:
             await page.close()

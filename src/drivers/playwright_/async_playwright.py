@@ -6,7 +6,8 @@ from time import sleep
 
 class Playwright:
 
-    def __init__(self) -> None:
+    def __init__(self, headless: bool) -> None:
+        self.headless = headless
         self.playwright = None
         self.browsers = None
         self.chrome = None
@@ -14,7 +15,7 @@ class Playwright:
 
     async def browser(self) -> BrowserContext:
         self.playwright = await async_playwright().start()
-        self.chrome: Browser = await self.playwright.chromium.launch(headless=False, args=['--window-position=-8,-2'])
+        self.chrome: Browser = await self.playwright.chromium.launch(headless=self.headless, args=['--window-position=-8,-2'])
         self.browsers: BrowserContext = await self.chrome.new_context()
         return self.browsers
     
