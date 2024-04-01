@@ -294,3 +294,12 @@ class DataAdmiralty:
         bankcapital = Bankcapital(ctx.obj)
         bankcapital.main()
         ...
+
+    @staticmethod
+    @task.command('anz')
+    @click.pass_context
+    def anz(ctx: Context) -> None:
+
+        anz = Anz(ctx.obj)
+        anz.main()
+        ...

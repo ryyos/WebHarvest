@@ -41,3 +41,13 @@ class DataDivtic:
         asyncio.run(geo.main())
 
         ...
+        
+    @staticmethod
+    @task.command('unodc')
+    @click.pass_context
+    def unodc(ctx: Context) -> None:
+
+        unodc = Unodc(ctx.obj)
+        asyncio.run(unodc.main())
+
+        ...

@@ -184,7 +184,13 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 Stream.found(process='PHOTO', message='FOUNDED', total=len(html.find('div[class="M3UVH"] img')))
             
         html: PyQuery = PyQuery(await page.content())
-        return [self.check_url(PyQuery(img).attr('src')) for img in html.find('div[class="M3UVH"] img')]
+
+        photos: List[str] = []
+        for img in html.find('div[class="M3UVH"] img'):
+            if not self.check_url(PyQuery(img).attr('src')): continue
+            photos.append(self.check_url(PyQuery(img).attr('src')))
+
+        return photos
         ...
 
     async def price(self, page: Page) -> Dict[str, any]:
@@ -291,6 +297,9 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             scroll_height = await page.evaluate("document.body.scrollHeight")
             current_height = await page.evaluate("window.scrollY + window.innerHeight")
 
+            ic(scroll_height)
+            ic(current_height)
+
             for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
                 index_done+=1
                 Stream.found(process='REVIEWS', message='FOUNDED', total=index_done)
@@ -299,8 +308,8 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                     "username_reviews": PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text() \
                         or PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] span.faBUBf').text(),
                     "image_reviews": PyQuery(review).find('div[class="jUkSGf WwUTAf"] img').attr('src'),
-                    "created_time": PyQuery(review).find('span[class="iUtr1 CQYfx"]').text(),
-                    "created_time_epoch": None,
+                    "created_time": Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()),
+                    "created_time_epoch": Time.convert_time(Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text())),
                     "reviews_rating": PyQuery(review).find('div[class="GDWaad"]').text(),
                     "detail_reviews_rating": [
                         {
@@ -311,8 +320,8 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                     "tags_review": list(PyQuery(review).find('div[class="ThUm5b"]').text().split(' ❘ ')),
                     "content_reviews": PyQuery(review).find('div[class="STQFb eoY5cb"] div[class="K7oBsc"]').text(),
                     "reply_content_reviews": {
-                        "username_reply_reviews": PyQuery(review).find('div.lU7Ape div.n7uVJf > span').eq(0).text(),
-                        "content_reviews": PyQuery(review).find('div.lU7Ape div.n7uVJf').text()
+                        "username_reply_reviews": val(PyQuery(review).find('div.lU7Ape div.n7uVJf > span').eq(0).text()),
+                        "content_reviews": '\n'.join(val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()).split('\n')[1:])
                     },
                     "media_reviews": [
                         PyQuery(img).find('img').attr('data-src') or PyQuery(img).find('img').attr('src') for img in PyQuery(review).find('div[class="fBMzfe"] div[jsname="o8HAFf"]')
@@ -325,6 +334,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             else:
                 while True:
                     await page.keyboard.press("ArrowDown")
+                    await sleep(0.5)
                     new_current_height = await page.evaluate("window.scrollY + window.innerHeight")
                     if new_current_height == current_height: break
                     current_height = new_current_height
