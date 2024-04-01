@@ -303,3 +303,12 @@ class DataAdmiralty:
         anz = Anz(ctx.obj)
         anz.main()
         ...
+
+    @staticmethod
+    @task.command('aladinbank')
+    @click.pass_context
+    def aladinbank(ctx: Context) -> None:
+
+        aladinbank = Aladinbank(ctx.obj)
+        aladinbank.main()
+        ...
