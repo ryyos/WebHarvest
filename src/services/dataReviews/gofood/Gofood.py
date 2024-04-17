@@ -1,7 +1,7 @@
 import os
 import datetime as date
 
-from requests import JSONDecodeError
+from json.decoder import JSONDecodeError
 from zlib import crc32
 from time import time
 from icecream import ic

@@ -4,8 +4,7 @@ from typing import Dict, List
 from asyncio import Queue, Semaphore
 from playwright.async_api import BrowserContext, Browser, Page
 from icecream import ic
-from src.drivers import Playwright
-from src.utils import Annotations
+from src.drivers import AsyncPlaywrightfrom src.utils import Annotations
 from .dependency import GoogleReviewsLibs
 
 class GoogleReviews(GoogleReviewsLibs):

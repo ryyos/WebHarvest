@@ -51,3 +51,14 @@ class DataDivtic:
         asyncio.run(unodc.main())
 
         ...
+        
+    @staticmethod
+    @task.command('worldbank', help='The Religion OfP eace')
+    @click.option('--mode', '-m', help='insert mode')
+    @click.pass_context
+    def world(ctx: Context, **kwargs) -> None:
+
+        world = Worldbank(ChainMap(ctx.obj, kwargs))
+        world.main()
+
+        ...

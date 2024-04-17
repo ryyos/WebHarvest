@@ -4,7 +4,7 @@ from icecream import ic
 from playwright.async_api import async_playwright, BrowserContext, Browser, Page
 from time import sleep
 
-class Playwright:
+class AsyncPlaywright:
 
     def __init__(self, headless: bool) -> None:
         self.headless = headless
