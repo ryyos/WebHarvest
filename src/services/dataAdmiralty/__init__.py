@@ -27,3 +27,4 @@ from .perdania.Perdania import Perdania
 from .bankcapital.Bankcapital import Bankcapital
 from .anz.Anz import Anz
 from .aladinbank.Aladinbank import Aladinbank
+from .ctbcbank.Ctbcbank import Ctbcbank
