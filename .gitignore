@@ -124,6 +124,7 @@ celerybeat.pid
 .venv
 components
 private
+.history/
 logs
 data
 env/
