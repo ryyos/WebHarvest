@@ -10,15 +10,18 @@ from requests import Response
 from icecream import ic
 from typing import Dict, List
 
-from src.drivers import SyncPlaywright, BrowserContext
+
 from .components import WorldbankComponent
+from src.drivers import SyncPlaywright, BrowserContext
+from src.utils import Casting
 
 class WorldbankLibs(WorldbankComponent):
-    def __init__(self) -> None:
+    def __init__(self, options: Dict[str, any]) -> None:
         super().__init__()
         
         self.api = ApiRetry(show_logs=True, defaulth_headers=True)
-        self.browser = SyncPlaywright(headless=False).start()
+        self.__headless = options.get('headless')
+        self.browser = SyncPlaywright(headless=False)
         
     def convert_to_json(self, csv: DataFrame) -> Dict[str, any]:
         result_json: list = loads(csv.to_json(orient="records"))
@@ -53,8 +56,8 @@ class WorldbankLibs(WorldbankComponent):
             row: PyQuery = PyQuery(row)
             results.append({
                 "country": row.find('a').text(),
-                "most_recent_year": row.find('div').eq(1).text(),
-                "most_recent_value": row.find('div').eq(2).text(),
+                "most_recent_year": Casting.to_int(row.find('div').eq(1).text()),
+                "most_recent_value": Casting.to_int(row.find('div').eq(2).text()),
             })
             
         return results

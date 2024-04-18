@@ -55,6 +55,7 @@ class DataDivtic:
     @staticmethod
     @task.command('worldbank', help='The Religion OfP eace')
     @click.option('--mode', '-m', help='insert mode')
+    @click.option('--headless', '-h',  is_flag=True, default=False)
     @click.pass_context
     def world(ctx: Context, **kwargs) -> None:
 

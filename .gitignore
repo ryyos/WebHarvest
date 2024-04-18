@@ -126,7 +126,9 @@ components
 private
 .history/
 logs
-data
+test/
+data/
+*.pyc
 env/
 venv/
 ENV/
