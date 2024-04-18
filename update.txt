@@ -1,3 +1,0 @@
-1. update trop suaya bisa customize range dan meng effisienkan penggunaan param
-2. update dekimashita supaya bisa me lowwer case kan semua key dan menghapus semua char tidak valid
-3. update dekimashita ada di tele

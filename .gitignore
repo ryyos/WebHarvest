@@ -122,8 +122,10 @@ celerybeat.pid
 # Environments
 .env
 .venv
+test.*
+playground.*
 components
-private
+private/
 .history/
 logs
 test/
