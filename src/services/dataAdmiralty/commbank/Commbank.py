@@ -20,10 +20,10 @@ class Commbank(CommbankLibs):
 
     async def chef(self, datas: Tuple[List[Dict[str, any]]]) -> None:
 
-        for type, data, url in zip(self.type, datas, self.target_url):
+        for type, data in zip(self.type, datas):
             path: str = self.base_path+type+'_Commbank.json'
             result = {
-                "link": url,
+                "link": self.target_url,
                 "type": type,
                 "domain": self.domain,
                 "tags": [self.domain],
@@ -53,10 +53,15 @@ class Commbank(CommbankLibs):
         
         task: any = []
         for profile in html.find('div[class="row matchHeight"]').eq(0).find('a.img'):
-            task.append(self.extract(profile))
+            task.append(self.extract(PyQuery(profile).attr('href')))
+            ...
+        results_komisaris.extend(await asyncio.gather(*task))
+            
+        task: any = []
+        for profile in html.find('div[class="row matchHeight"]').eq(1).find('a.img'):
+            task.append(self.extract(PyQuery(profile).attr('href')))
             ...
             
-        results_direksi.extend
-
+        results_direksi.extend(await asyncio.gather(*task))
         await self.chef((results_direksi, results_komisaris))
         ...

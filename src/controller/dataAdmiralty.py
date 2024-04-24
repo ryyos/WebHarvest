@@ -317,7 +317,47 @@ class DataAdmiralty:
     @task.command('ctbcbank')
     @click.pass_context
     def ctbcbank(ctx: Context) -> None:
-
+        
         ctbcbank = Ctbcbank(ctx.obj)
         ctbcbank.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('commbank')
+    @click.pass_context
+    def commbank(ctx: Context) -> None:
+
+        commbank = Commbank(ctx.obj)
+        asyncio.run(commbank.main())
+        ...
+        
+    @staticmethod
+    @task.command('btpn')
+    @click.pass_context
+    def btpn(ctx: Context) -> None:
+        
+        btpn = Btpn(ctx.obj)
+        btpn.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('bankvictoriasyariah')
+    @click.pass_context
+    def bankvictoriasyariah(ctx: Context) -> None:
+        
+        bankvictoriasyariah = Bankvictoriasyariah(ctx.obj)
+        bankvictoriasyariah.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('krom')
+    @click.pass_context
+    def krom(ctx: Context) -> None:
+        
+        krom = Krom(ctx.obj)
+        krom.main()
+        
         ...

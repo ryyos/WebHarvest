@@ -20,11 +20,11 @@ class CommbankLibs(CommbankComponent):
 
     async def extract_bio(self, html: PyQuery) -> Tuple[str, any, None]:
 
-        name: str = html.find('div[class="txt-content-nama"]').text()
-        jabatan: str = html.find('div[class="txt-content-jabatan"]').text()
-        foto: str = html.find('img').attr('src')
-        pekerjaan: str = html.find('p').eq(-1).text()
-        bio: str = PyQuery(html.find('p')[:-1]).text()
+        name: str = html.find('hgroup').text().split(',')[-1]
+        jabatan: str = html.find('hgroup').text().split(',')[0]
+        foto: str = html.find('div.section.clearfix.content-wrap.m-t-55 img').attr('src')
+        pekerjaan: str = html.find('div.section.clearfix.content-wrap.m-t-55 p').eq(-1).text()
+        bio: str = PyQuery(html.find('div.section.clearfix.content-wrap.m-t-55 p')[:-1]).text()
 
         return (foto, name, jabatan, bio, pekerjaan)
         ...
@@ -32,29 +32,19 @@ class CommbankLibs(CommbankComponent):
     async def extract(self, url: str) -> List[Dict[str, any]]:
         response: Response = self.api.get(url)
         html: PyQuery = PyQuery(response.text)
-        
-        profiles: List[PyQuery] = html.find('#wrap-profil-person div.profil-person')
 
-        ic(profiles)
+        (foto, name, jabatan, bio, pekerjaan) = await self.extract_bio(PyQuery(html))
 
-        results: List[dict] = []
-        for profile in profiles:
-            (foto, name, jabatan, bio, pekerjaan) = await self.extract_bio(PyQuery(profile))
-
-            results.append({
-                "nama_lengkap": name,
-                "nama_jabatan": jabatan,
-                "link_foto": foto,
-                "biografi": bio,
-                "riwayat_pekerjaan": pekerjaan,
-                "dll": None,
-                "organisasi": None,
-                "riwayat_pendidikan": None,
-                "riwayat_pencapaian": None,
-                "tempat_tanggal_lahir": None,
-            })
-
-            ...
-
-        return results
+        return {
+            "nama_lengkap": name,
+            "nama_jabatan": jabatan,
+            "link_foto": foto,
+            "biografi": bio,
+            "riwayat_pekerjaan": pekerjaan,
+            "dll": None,
+            "organisasi": None,
+            "riwayat_pendidikan": None,
+            "riwayat_pencapaian": None,
+            "tempat_tanggal_lahir": None,
+        }
         ...

@@ -53,7 +53,7 @@ class DataDivtic:
         ...
         
     @staticmethod
-    @task.command('worldbank', help='The Religion OfP eace')
+    @task.command('worldbank')
     @click.option('--mode', '-m', help='insert mode')
     @click.option('--headless', '-h',  is_flag=True, default=False)
     @click.pass_context
@@ -61,5 +61,17 @@ class DataDivtic:
 
         world = Worldbank(ChainMap(ctx.obj, kwargs))
         world.main()
+
+        ...
+        
+    @staticmethod
+    @task.command('ahugoid')
+    @click.option('--keyword', '-k', help='insert keyword')
+    @click.option('--recaptcha', '-k', help='insert recaptcha token')
+    @click.pass_context
+    def ahugoid(ctx: Context, **kwargs) -> None:
+
+        ahugoid = Ahugoid(ChainMap(ctx.obj, kwargs))
+        ahugoid.main()
 
         ...

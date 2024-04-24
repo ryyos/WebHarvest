@@ -28,3 +28,7 @@ from .bankcapital.Bankcapital import Bankcapital
 from .anz.Anz import Anz
 from .aladinbank.Aladinbank import Aladinbank
 from .ctbcbank.Ctbcbank import Ctbcbank
+from .commbank.Commbank import Commbank
+from .btpn.Btpn import Btpn
+from .bankvictoriasyariah.Bankvictoriasyariah import Bankvictoriasyariah
+from .krom.Krom import Krom
