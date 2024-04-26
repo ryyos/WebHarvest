@@ -60,3 +60,7 @@ class Stream:
        @staticmethod
        def one(process: str, message: str, value: str) -> None:
               logger.info(f'[ {style(process, fg="bright_green")} ] :: {style(message, fg="bright_blue")}: [ {value} ]')
+              
+       @staticmethod
+       def errone(process: str, message: str, value: str) -> None:
+              logger.error(f'[ {style(process, fg="bright_green")} ] :: {style(message, fg="bright_blue")}: [ {value} ]')

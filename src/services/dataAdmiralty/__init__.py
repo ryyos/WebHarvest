@@ -32,3 +32,6 @@ from .commbank.Commbank import Commbank
 from .btpn.Btpn import Btpn
 from .bankvictoriasyariah.Bankvictoriasyariah import Bankvictoriasyariah
 from .krom.Krom import Krom
+from .bjj.Bjj import Bjj
+from .bankneocommerce.Bankneocommerce import Bankneocommerce
+from .panin.Panin import Panin

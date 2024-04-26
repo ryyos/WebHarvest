@@ -11,6 +11,7 @@ from src.utils import Stream
 
 class ConnectionS3:
     def __init__(self) -> None:
+        print('testttttttttttttttttttttttt')
         self.S3_CONFIGURATION = settings.S3_CONFIGURATIONS
         self.BOTO3_CONFIGURATIONS = settings.BOTO3_CONFIGURATIONS
 

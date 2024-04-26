@@ -3,7 +3,7 @@ import datetime as date
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 
-from time import strftime, time
+from time import strftime, time, localtime, struct_time, mktime
 from requests_html import HTMLSession
 from datetime import datetime, timezone
 
@@ -41,13 +41,21 @@ class Time:
     def epoch_ms():
         return str(round(time() * 1000))
         ...
+    @staticmethod
+    def epoch_today():
+        current_time = time()
+        local_time = localtime(current_time)
+        midnight_time = struct_time((local_time.tm_year, local_time.tm_mon, local_time.tm_mday, 0, 0, 0, local_time.tm_wday, local_time.tm_yday, local_time.tm_isdst))
+        midnight_epoch = mktime(midnight_time)
+        return int(midnight_epoch)
+
 
     @staticmethod
     def relative2date(relative_time: str) -> str:
         if relative_time.startswith('se'):
             relative_time = f'1 {relative_time[2:]}'
-
-        parsed_time = parse(relative_time, fuzzy=True)
+            
+        parsed_time = datetime.now()
 
         if 'menit' in relative_time:
             minutes_ago = int(relative_time.split()[0])

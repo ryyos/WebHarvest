@@ -361,3 +361,34 @@ class DataAdmiralty:
         krom.main()
         
         ...
+        
+    @staticmethod
+    @task.command('bjj')
+    @click.pass_context
+    def bjj(ctx: Context) -> None:
+        
+        bjj = Bjj(ctx.obj)
+        bjj.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('bankneocommerce')
+    @click.option('--headless', '-h', is_flag=True, default=False)
+    @click.pass_context
+    def bankneocommerce(ctx: Context, **kwargs) -> None:
+        
+        bankneocommerce = Bankneocommerce(ChainMap(ctx.obj, kwargs))
+        bankneocommerce.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('panin')
+    @click.pass_context
+    def panin(ctx: Context) -> None:
+        
+        panin = Panin(ctx.obj)
+        panin.main()
+        
+        ...

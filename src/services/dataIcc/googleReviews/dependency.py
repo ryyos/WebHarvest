@@ -14,12 +14,15 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
     def __init__(self, options: Dict[str, bool]) -> None:
         super().__init__()
 
-        self.dones: List[str] = File.read_list_json('src/database/json/google_review.json')
+        self.dones: List[str] = File.read_list_json(self.path_done)
+        self.error: List[dict] = File.read_list_json(self.path_error_hand)
 
         self.__topic: str = options["topic"]
         self.__save: str = options["save"]
         self.__kafka: str = options["kafka"]
+        self.__mode: str = options["mode"]
 
+        self.__epoch_today: int = Time.epoch_today()
         ...
 
     def vfree(self, text: str) -> str:
@@ -33,6 +36,10 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             else: return text
         except Exception:
             return text
+        
+    def choice_mode(self, text: str) -> str:
+        if text == 'stream': return self.__epoch_today
+        elif text == 'all': return 1
 
     async def completed_not_yet(self, id: str) -> bool:
         if id in self.dones: return True
@@ -85,7 +92,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 "thumbnail": val(PyQuery(top).find('img[class="x7VXS I2nXKd"]').attr('data-src')),
                 "place": val(PyQuery(top).find('div.AFZtd').text()),
                 "rating": to_float(val(PyQuery(top).find('span.KFi5wf').text())),
-                "total_ratings": to_int(Dekimashita.vnum(val(PyQuery(top).find('span.jdzyld').text()))),
+                "total_ratings": to_int(Dekimashita.vnum(val(PyQuery(top).find('span.jdzyld').text()))) if val(PyQuery(top).find('span.jdzyld').text()) else None,
                 "location": val(PyQuery(top).find('div.bJlStd').text()),
                 "distance": val(PyQuery(top).find('span[class="kJW6fe"]').text()) or val(PyQuery(top).find('div[class="kC4Ofd NUiScc"]').text())
             })
@@ -285,31 +292,41 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
 
     async def reviews(self, page: Page) -> AsyncGenerator[Dict[str, any], any]:
         await page.locator('//*[@id="reviews"]/span').click()
-        html: PyQuery = PyQuery(await page.content())
 
         bottom: bool = False
         scroll_height = await page.evaluate("document.body.scrollHeight")
         current_height = await page.evaluate("window.scrollY + window.innerHeight")
+        
+        await page.click('.jM7iqc:nth-child(1) svg')
+        await page.get_by_role('option', name='Terbaru').click()
         await page.locator('//*[@id="reviews"]/c-wiz/c-wiz/div/div/div/div').click()
+        
+        html: PyQuery = PyQuery(await page.content())
         index_done = 0
         while not bottom:
             html: PyQuery = PyQuery(await page.content())
             scroll_height = await page.evaluate("document.body.scrollHeight")
             current_height = await page.evaluate("window.scrollY + window.innerHeight")
 
-            ic(scroll_height)
-            ic(current_height)
+            Stream.one(process='REVIEWS', message='SCROLL DOWN', value=f'{current_height} | {scroll_height}')
 
             for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
                 index_done+=1
+                time_epoch: int = Time.convert_time(Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()))
+                
+                if time_epoch < self.choice_mode(self.__mode): 
+                    bottom = True
+                    break
+                
                 Stream.found(process='REVIEWS', message='FOUNDED', total=index_done)
+                
                 yield {
                     "id_review": Endecode.md5_hash(PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text()),
                     "username_reviews": PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text() \
                         or PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] span.faBUBf').text(),
                     "image_reviews": PyQuery(review).find('div[class="jUkSGf WwUTAf"] img').attr('src'),
                     "created_time": Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()),
-                    "created_time_epoch": Time.convert_time(Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text())),
+                    "created_time_epoch": time_epoch,
                     "reviews_rating": PyQuery(review).find('div[class="GDWaad"]').text(),
                     "detail_reviews_rating": [
                         {
@@ -321,7 +338,8 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                     "content_reviews": PyQuery(review).find('div[class="STQFb eoY5cb"] div[class="K7oBsc"]').text(),
                     "reply_content_reviews": {
                         "username_reply_reviews": val(PyQuery(review).find('div.lU7Ape div.n7uVJf > span').eq(0).text()),
-                        "content_reviews": '\n'.join(val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()).split('\n')[1:])
+                        "content_reviews": '\n'.join(val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()).split('\n')[1:])\
+                            if val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()) else None
                     },
                     "media_reviews": [
                         PyQuery(img).find('img').attr('data-src') or PyQuery(img).find('img').attr('src') for img in PyQuery(review).find('div[class="fBMzfe"] div[jsname="o8HAFf"]')
@@ -331,6 +349,8 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             
             if current_height >= scroll_height:
                 bottom = True
+            elif bottom:
+                break
             else:
                 while True:
                     await page.keyboard.press("ArrowDown")
@@ -342,38 +362,52 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         ...
 
     async def extract_hotel(self, url: str, page: Page) -> None:
-        await page.goto(url)
-        await sleep(5)
+        try:
+            await page.goto(url)
+            await sleep(5)
 
-        meta: dict = await self.metadata(url, page)
+            meta: dict = await self.metadata(url, page)
+            
+            if await self.completed_not_yet(meta["id"]) and self.__mode == 'all':
+                return True
+            
+            Stream.one(process="EXTRACT", message="HOTEL", value=meta["name"])
+            
+            foto: None = None
+            result: dict = {
+                **meta,
+                "tempat_terdekat": await self.nearby_places(page),
+                "harga": await self.price(page),
+                "tentang": await self.about(page),
+                "reviews": await self.reviews_header(page),
+                "foto": {},
+            }
 
-        if await self.completed_not_yet(meta["id"]): raise Exception('done')
+            async for review in self.reviews(page):
+                if not foto: foto = await self.photo(page),
+                
+                result["reviews"].update(review)
+                result["foto"].update(foto)
+                
+                if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{review["id_review"]}.json', result)            
 
-        result: dict = {
-            **meta,
-            "tempat_terdekat": await self.nearby_places(page),
-            "harga": await self.price(page),
-            "tentang": await self.about(page),
-            "foto": await self.photo(page),
-            "reviews": await self.reviews_header(page)
-        }
-
-        if self.__save:
-            File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/detail/json/{Time.epoch_ms()}.json', result)
-
-        async for review in self.reviews(page):
-            result["reviews"].update(review)
-            if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{Time.epoch_ms()}.json', result)
-        
-
-        self.dones.append(meta['id'])
-        if self.__save or self.__kafka: File.write_json('src/database/json/google_review.json', self.dones)
-        ...
+            self.dones.append(meta['id'])
+            if self.__save or self.__kafka: File.write_json(self.path_done, self.dones)
+        except Exception as err:
+            Stream.errone(process="EXTRACT", message="MESSAGE", value=str(err))
+            self.error.append({
+                "url": url,
+                "message": str(err)
+            })
+            File.write_json(self.path_error_hand, self.error)
+        # ...
 
     async def execute(self, url: str, browser: BrowserContext) -> None:
         page: Page = await browser.new_page()
         try:
-            await self.extract_hotel(url, page)
+            value = await self.extract_hotel(url, page)
+            if value: raise Exception("DONE")
+            ...
         except Exception as err:
             Stream.found(process='DONE', message='URL', total=url)
             ...

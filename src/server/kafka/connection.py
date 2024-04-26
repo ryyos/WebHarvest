@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from kafka import KafkaProducer
 
 class ConnectionKafka:
-    def start(self) -> KafkaProducer:
+    def __init__(self) -> KafkaProducer:
         try:
             self.__kafka_configuration: dict = settings.KAFKA_CONFIGURATIONS
 

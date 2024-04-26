@@ -18,10 +18,10 @@ class Krom(KromLibs):
 
     def chef(self, datas: Tuple[List[Dict[str, any]]]) -> None:
 
-        for type, data, url in zip(self.type, datas, self.target_url):
+        for type, data in zip(self.type, datas):
             path: str = self.base_path+type+'_Krom.json'
             result = {
-                "link": url,
+                "link": self.target_url,
                 "type": type,
                 "domain": self.domain,
                 "tags": [self.domain],

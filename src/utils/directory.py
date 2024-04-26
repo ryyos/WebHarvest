@@ -19,3 +19,8 @@ class Dir:
         path[1] = 'data_clean'
         return '/'.join(path)
         ...
+
+    @staticmethod
+    def basedir(path: str) -> str:
+        return os.path.dirname(path)
+        ...
