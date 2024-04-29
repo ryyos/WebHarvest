@@ -75,3 +75,13 @@ class DataDivtic:
         ahugoid.main()
 
         ...
+        
+    @staticmethod
+    @task.command('dephub')
+    @click.pass_context
+    def dephub(ctx: Context) -> None:
+
+        dephub = Dephub(ctx.obj)
+        dephub.main()
+
+        ...

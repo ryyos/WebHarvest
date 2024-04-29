@@ -8,6 +8,7 @@ from pyquery import PyQuery
 from dekimashita import Dekimashita
 
 from .component import GoogleReviewsComponent
+from src.server import Kafkaa
 from src.utils import *
 
 class GoogleReviewsLibs(GoogleReviewsComponent):
@@ -299,6 +300,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         
         await page.click('.jM7iqc:nth-child(1) svg')
         await page.get_by_role('option', name='Terbaru').click()
+        await sleep(1)
         await page.locator('//*[@id="reviews"]/c-wiz/c-wiz/div/div/div/div').click()
         
         html: PyQuery = PyQuery(await page.content())
@@ -308,7 +310,6 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             scroll_height = await page.evaluate("document.body.scrollHeight")
             current_height = await page.evaluate("window.scrollY + window.innerHeight")
 
-            Stream.one(process='REVIEWS', message='SCROLL DOWN', value=f'{current_height} | {scroll_height}')
 
             for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
                 index_done+=1
@@ -356,12 +357,15 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                     await page.keyboard.press("ArrowDown")
                     await sleep(0.5)
                     new_current_height = await page.evaluate("window.scrollY + window.innerHeight")
-                    if new_current_height == current_height: break
+                    Stream.one(process='REVIEWS', message='SCROLL DOWN', value=f'{new_current_height} | {scroll_height}')
+                    if new_current_height >= current_height: break
                     current_height = new_current_height
             ...
         ...
 
-    async def extract_hotel(self, url: str, page: Page) -> None:
+    async def extract_hotel(self, url: str, browser: BrowserContext) -> None:
+        page: Page = await browser.new_page()
+        photos: List[str] = None
         try:
             await page.goto(url)
             await sleep(5)
@@ -373,26 +377,35 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
             
             Stream.one(process="EXTRACT", message="HOTEL", value=meta["name"])
             
-            foto: None = None
             result: dict = {
                 **meta,
                 "tempat_terdekat": await self.nearby_places(page),
                 "harga": await self.price(page),
                 "tentang": await self.about(page),
                 "reviews": await self.reviews_header(page),
-                "foto": {},
+                "foto": None,
             }
 
             async for review in self.reviews(page):
-                if not foto: foto = await self.photo(page),
-                
+                if not photos:
+                    page_photo: Page = await browser.new_page()
+                    try:
+                        await page_photo.goto(url)
+                        await sleep(5)
+                        photos: List[str] = await self.photo(page_photo)
+                    except Exception as err:
+                        Stream.errone(process="PHOTO", message="MESSAGE", value=str(err))
+                    finally:
+                        await page_photo.close()
+                    
                 result["reviews"].update(review)
-                result["foto"].update(foto)
+                result['foto'] = photos
                 
-                if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{review["id_review"]}.json', result)            
+                if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{review["id_review"]}.json', result)
+                if self.__kafka: Kafkaa.send(result, self.__topic)
 
             self.dones.append(meta['id'])
-            if self.__save or self.__kafka: File.write_json(self.path_done, self.dones)
+            if self.__mode == 'all': File.write_json(self.path_done, self.dones)
         except Exception as err:
             Stream.errone(process="EXTRACT", message="MESSAGE", value=str(err))
             self.error.append({
@@ -400,16 +413,16 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 "message": str(err)
             })
             File.write_json(self.path_error_hand, self.error)
-        # ...
+
+        finally:
+            await page.close()
 
     async def execute(self, url: str, browser: BrowserContext) -> None:
-        page: Page = await browser.new_page()
         try:
-            value = await self.extract_hotel(url, page)
+            value = await self.extract_hotel(url, browser)
             if value: raise Exception("DONE")
             ...
         except Exception as err:
             Stream.found(process='DONE', message='URL', total=url)
             ...
-        finally:
-            await page.close()
+

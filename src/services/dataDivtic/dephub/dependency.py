@@ -1,3 +1,4 @@
+import requests
 
 from ApiRetrys import ApiRetry
 from requests import Response
@@ -13,9 +14,12 @@ class  DephubLibs(DephubComponent):
         
         self.api = ApiRetry(show_logs=True)
         ...
+
+    def build_path(self, id: str) -> str:
+        return 'data/data_raw/dephub/data_pelabuhan/json/{}.json'.format(id)
         
     def get_list_table(self, url: str) -> List[Dict[str, any]]:
-        response: Response = self.api.get(url, headers=self.headers, cookies=self.cookies)
+        response: Response = self.api.post(url, headers=self.headers, data=self.data, cookies=self.cookies)
         return response.json()["data"]
         ...
     def get_profile(self, html: PyQuery) -> Dict[str, any]:
@@ -39,14 +43,16 @@ class  DephubLibs(DephubComponent):
         _temp: List[dict] = []
         for card in html.find('div.card_body > div.row > div'):
             card: PyQuery = PyQuery(card)
+            address: List[str] = card.find('address').text().split()
             _temp.append({
                 "desa_kecamatan": card.find('h4').text(),
-                "nc": card.text().split('NC:')[-1].split(' ')[0],
-                "address": card.find('address').text().split('\n')[0],
-                "long": card.find('address').text().split('\n')[-2].split(',')[0],
-                "lat": card.find('address').text().split('\n')[-2].split(',')[-1],
+                "nc": card.text().split('NC:')[-1].split()[0],
+                "lat": address.pop(-1),
+                "long": address.pop(-1),
+                "address": ' '.join(address),
             })
             ...
+        return _temp
         ...
         
     def get_hirarki_pelabuhan(self, html: PyQuery) -> List[Dict[str, any]]:
@@ -58,6 +64,28 @@ class  DephubLibs(DephubComponent):
                 "code": card.text().replace(card.find('h4').text(), '').strip(),
             })
             ...
+        return _temp
         ...
+        
+    def get_fasilitas_pokok(self, id: str) -> Dict[str, any]:
+        
+        def get_dataDermaga(id: str) -> List[any]:
+            response: Response = requests.post(self.url_dataDermaga+id, data=self.data_dataDermaga, headers=self.headers, cookies=self.fasilitas_cookies)
+            return response.json()["data"]
+        
+        def getTrestle(id: str) -> List[any]:
+            response: Response = requests.post(self.url_getTrestle+id, data=self.data_getTrestle, headers=self.headers, cookies=self.fasilitas_cookies)
+            return response.json()["data"]
+        
+        def getCauseway(id: str) -> List[any]:
+            response: Response = requests.post(self.url_getCauseway+id, data=self.data_getCauseway, headers=self.headers, cookies=self.fasilitas_cookies)
+            return response.json()["data"]
+        
+        _temp: dict = {
+            "dataDermaga": get_dataDermaga(id),
+            "Trestle": getTrestle(id),
+            "Causeway": getCauseway(id),
+        }
+        
         return _temp
         ...

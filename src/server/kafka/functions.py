@@ -15,7 +15,7 @@ class Kafkaa:
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(Kafkaa, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._connection = ConnectionKafka()
         return cls._instance
     
@@ -23,7 +23,7 @@ class Kafkaa:
     def send(cls, _data_: dict, _topic_: str = None) -> None:
         cls()
         _topic_: str = _topic_ if _topic_ else settings.KAFKA_CONFIGURATIONS.get('topic')
-        cls._connection.send(_topic_=_topic_, _value_=str.encode(json.dumps(_data_)))
+        cls._connection.kafka_produser.send(topic=_topic_, value=str.encode(json.dumps(_data_)))
         Stream.shareKafka(_topic_)
 
     @classmethod
@@ -35,4 +35,4 @@ class Kafkaa:
                     file_path = os.path.join(root, file).replace('\\', '/')
                     Stream.shareKafka(file_path)
                     data: dict = File.read_json(file_path)
-                    cls._connection.send(data)
+                    cls._connection.kafka_produser.send(data)
