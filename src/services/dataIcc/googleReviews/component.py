@@ -1,3 +1,4 @@
+from src.utils import Time
 class GoogleReviewsComponent:
     def __init__(self) -> None:
 
@@ -6,4 +7,5 @@ class GoogleReviewsComponent:
         self.domain = 'www.google.co.id'
         self.path_error_hand = 'src/database/json/google_review_err.json'
         self.path_done = 'src/database/json/google_review_done.json'
+        self.path_log = f'logs/google_reviews/{str(Time.now())}.log'
         ...

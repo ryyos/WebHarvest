@@ -31,7 +31,7 @@ class File:
     def write(path: str, content: any) -> None:
         Dir.create_dir(Dir.basedir(path))
         with open(path, 'a', encoding="utf-8") as file:
-            file.write(content)
+            file.write(content+'\n')
         ...
 
     @staticmethod

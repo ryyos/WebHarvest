@@ -5,7 +5,7 @@ from asyncio import Queue, Semaphore
 from playwright.async_api import BrowserContext, Browser, Page
 from icecream import ic
 from src.drivers import AsyncPlaywright
-from src.utils import Annotations
+from src.utils import Annotations, File
 from .dependency import GoogleReviewsLibs
 
 class GoogleReviews(GoogleReviewsLibs):
@@ -34,4 +34,5 @@ class GoogleReviews(GoogleReviewsLibs):
                 tasks.clear()
 
         await self.__playwright.close()
+        File.write(self.path_log, f'[ DONE ]')
         ...

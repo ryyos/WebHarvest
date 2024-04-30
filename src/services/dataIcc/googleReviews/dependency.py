@@ -16,7 +16,6 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         super().__init__()
 
         self.dones: List[str] = File.read_list_json(self.path_done)
-        self.error: List[dict] = File.read_list_json(self.path_error_hand)
 
         self.__topic: str = options["topic"]
         self.__save: str = options["save"]
@@ -190,6 +189,9 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 if 'eLNT1d' in classe: break
                 html: PyQuery = PyQuery(await page.content())
                 Stream.found(process='PHOTO', message='FOUNDED', total=len(html.find('div[class="M3UVH"] img')))
+                
+                break
+            break
             
         html: PyQuery = PyQuery(await page.content())
 
@@ -298,18 +300,28 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         scroll_height = await page.evaluate("document.body.scrollHeight")
         current_height = await page.evaluate("window.scrollY + window.innerHeight")
         
-        await page.click('.jM7iqc:nth-child(1) svg')
-        await page.get_by_role('option', name='Terbaru').click()
-        await sleep(1)
-        await page.locator('//*[@id="reviews"]/c-wiz/c-wiz/div/div/div/div').click()
+        try:
+            
+            '''
+            * Jika Error disini karena 'Page.click: Timeout 120000ms'
+            * berari di dalam hotel tidak terdapat reviews
+            '''
+            
+            await page.click('.jM7iqc:nth-child(1) svg')
+            await page.get_by_role('option', name='Terbaru').click()
+            await sleep(1)
+            await page.locator('//*[@id="reviews"]/c-wiz/c-wiz/div/div/div/div').click()
+            
+            html: PyQuery = PyQuery(await page.content())
+            
+        except Exception:
+            bottom = True
         
-        html: PyQuery = PyQuery(await page.content())
         index_done = 0
         while not bottom:
             html: PyQuery = PyQuery(await page.content())
             scroll_height = await page.evaluate("document.body.scrollHeight")
             current_height = await page.evaluate("window.scrollY + window.innerHeight")
-
 
             for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
                 index_done+=1
@@ -386,7 +398,10 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 "foto": None,
             }
 
+            total_reviews: int = 0
+            total_photos: int = 0
             async for review in self.reviews(page):
+                total_reviews+=1
                 if not photos:
                     page_photo: Page = await browser.new_page()
                     try:
@@ -400,17 +415,21 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                     
                 result["reviews"].update(review)
                 result['foto'] = photos
+                total_photos = len(photos)
                 
                 if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{review["id_review"]}.json', result)
                 if self.__kafka: Kafkaa.send(result, self.__topic)
 
             self.dones.append(meta['id'])
             if self.__mode == 'all': File.write_json(self.path_done, self.dones)
+            if self.__mode == 'stream': File.write(self.path_log, f'[ {Time.now()} ] :: HOTEL [ {meta["name"]} ] | REVIEWS [ {total_reviews} ] | PHOTOS [ {total_photos} ]')
         except Exception as err:
+            self.error: List[dict] = File.read_list_json(self.path_error_hand)
             Stream.errone(process="EXTRACT", message="MESSAGE", value=str(err))
             self.error.append({
                 "url": url,
-                "message": str(err)
+                "message": str(err),
+                "mode": self.__mode,
             })
             File.write_json(self.path_error_hand, self.error)
 

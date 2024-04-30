@@ -3,6 +3,7 @@ import json
 import settings
 import os
 
+from time import sleep
 from icecream import ic
 from dotenv import load_dotenv
 
@@ -26,13 +27,12 @@ class Kafkaa:
         cls._connection.kafka_produser.send(topic=_topic_, value=str.encode(json.dumps(_data_)))
         Stream.shareKafka(_topic_)
 
-    @classmethod
-    def local2kafka(cls, _source_: str) -> None:
-        cls()
+    @staticmethod
+    def local2kafka(_source_: str, _topic_: str = None) -> None:
         for root, _, files in os.walk(_source_.replace('\\', '/')):
             for file in files:
                 if file.endswith('json'):
                     file_path = os.path.join(root, file).replace('\\', '/')
-                    Stream.shareKafka(file_path)
+                    Stream.shareKafka(_topic_)
                     data: dict = File.read_json(file_path)
-                    cls._connection.kafka_produser.send(data)
+                    Kafkaa.send(data, _topic_)
