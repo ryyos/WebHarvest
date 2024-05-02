@@ -393,3 +393,13 @@ class DataAdmiralty:
         panin.main()
         
         ...
+        
+    @staticmethod
+    @task.command('kbbanksyariah')
+    @click.pass_context
+    def kbbanksyariah(ctx: Context) -> None:
+        
+        kbbanksyariah = Kbbanksyariah(ctx.obj)
+        kbbanksyariah.main()
+        
+        ...
