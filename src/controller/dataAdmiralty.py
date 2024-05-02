@@ -61,6 +61,7 @@ class DataAdmiralty:
     @click.option('--year', '-yr')
     @click.option('--start', '-st')
     @click.option('--end', '-e')
+    @click.option('--topic', '-t')
     @click.pass_context
     def trop(ctx: Context, **kwargs) -> None:
 

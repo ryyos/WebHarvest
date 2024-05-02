@@ -20,6 +20,7 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
         self.__customize: bool = options.get('custom')
         self.__year: str = options.get('year')
         self.__url: str = options.get('url')
+        self.__topic: str = options.get('topic')
         ...
 
     def extract(self, url: str, year: str, stream: bool) -> None:
@@ -38,7 +39,7 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
                 "link": url,
                 "domain": self.domain,
                 "tags": [self.domain],
-                "topic_kafka": self.topic,
+                "topic_kafka": self.__topic,
                 "crawling_time": Time.now(),
                 "crawling_time_epoch": Time.epoch(),
                 "title": html.find('h2[class="h3-DarkSlate"]').text().replace('\n', ''),
@@ -66,13 +67,15 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
             if self.__save:
                 File.write_json(path, results)
             if self.__kafka:
-                Kafkaa.send(results)
+                Kafkaa.send(results, self.__topic)
 
         Stream.found(
             process='STREAM',
             message='DATA FOUND',
             total=len(tables)
         )
+        
+        File.write(self.path_log, f'[ {Time.now()} ] :: DATA FOUND [ {len(tables)} ]')
         ...
 
 
