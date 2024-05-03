@@ -403,3 +403,13 @@ class DataAdmiralty:
         kbbanksyariah.main()
         
         ...
+        
+    @staticmethod
+    @task.command('okbank')
+    @click.pass_context
+    def okbank(ctx: Context) -> None:
+        
+        okbank = Okbank(ctx.obj)
+        okbank.main()
+        
+        ...

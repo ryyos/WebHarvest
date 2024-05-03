@@ -36,3 +36,4 @@ from .bjj.Bjj import Bjj
 from .bankneocommerce.Bankneocommerce import Bankneocommerce
 from .panin.Panin import Panin
 from .kbbanksyariah.Kbbanksyariah import Kbbanksyariah
+from .okbank.Okbank import Okbank
