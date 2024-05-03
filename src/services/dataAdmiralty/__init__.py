@@ -37,3 +37,4 @@ from .bankneocommerce.Bankneocommerce import Bankneocommerce
 from .panin.Panin import Panin
 from .kbbanksyariah.Kbbanksyariah import Kbbanksyariah
 from .okbank.Okbank import Okbank
+from .amarbank.Amarbank import Amarbank

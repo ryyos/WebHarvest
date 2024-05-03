@@ -413,3 +413,13 @@ class DataAdmiralty:
         okbank.main()
         
         ...
+        
+    @staticmethod
+    @task.command('amarbank')
+    @click.pass_context
+    def amarbank(ctx: Context) -> None:
+        
+        amarbank = Amarbank(ctx.obj)
+        amarbank.main()
+        
+        ...
