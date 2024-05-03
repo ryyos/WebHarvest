@@ -1,5 +1,4 @@
-
-from typing import List
+from typing import List, Dict
 
 def split_list(datas: List[any], length_each: int):
     results: List[any] = []
@@ -32,3 +31,34 @@ def vlist_dict(data_list, key):
             seen.add(d[key])
             result.append(d)
     return result
+
+
+def search_key_v2(data: Dict[str, any], key: str, required_key: str = None) -> any:
+    if key in data:
+        if isinstance(data[key], dict):
+            if required_key is None:
+                return data[key]
+            elif required_key in data[key]:
+                return data[key][required_key]
+        else:
+            return None
+
+    for k, v in data.items():
+        if isinstance(v, dict):
+            result = search_key_v2(v, key, required_key)
+            if result is not None:
+                return result
+    return None
+
+def search_key(data: Dict[str, any], key: str) -> any:
+    if not isinstance(data, dict):
+        return None
+    if key in data:
+        return data[key]
+    for value in data.values():
+        if isinstance(value, dict):
+            result = search_key(value, key)
+            if result is not None:
+                return result
+
+    return None

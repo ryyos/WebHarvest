@@ -38,3 +38,5 @@ from .panin.Panin import Panin
 from .kbbanksyariah.Kbbanksyariah import Kbbanksyariah
 from .okbank.Okbank import Okbank
 from .amarbank.Amarbank import Amarbank
+from .seabank.Seabank import Seabank
+from .bcasyariah.Bcasyariah import Bcasyariah

@@ -423,3 +423,23 @@ class DataAdmiralty:
         amarbank.main()
         
         ...
+        
+    @staticmethod
+    @task.command('seabank')
+    @click.pass_context
+    def seabank(ctx: Context) -> None:
+        
+        seabank = Seabank(ctx.obj)
+        seabank.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('bcasyariah')
+    @click.pass_context
+    def bcasyariah(ctx: Context) -> None:
+        
+        bcasyariah = Bcasyariah(ctx.obj)
+        bcasyariah.main()
+        
+        ...
