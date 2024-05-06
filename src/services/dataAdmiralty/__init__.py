@@ -40,3 +40,4 @@ from .okbank.Okbank import Okbank
 from .amarbank.Amarbank import Amarbank
 from .seabank.Seabank import Seabank
 from .bcasyariah.Bcasyariah import Bcasyariah
+from .jago.Jago import Jago

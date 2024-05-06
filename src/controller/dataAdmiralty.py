@@ -443,3 +443,13 @@ class DataAdmiralty:
         bcasyariah.main()
         
         ...
+        
+    @staticmethod
+    @task.command('jago')
+    @click.pass_context
+    def jago(ctx: Context) -> None:
+        
+        jago = Jago(ctx.obj)
+        jago.main()
+        
+        ...
