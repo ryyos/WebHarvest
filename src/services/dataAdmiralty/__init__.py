@@ -41,3 +41,7 @@ from .amarbank.Amarbank import Amarbank
 from .seabank.Seabank import Seabank
 from .bcasyariah.Bcasyariah import Bcasyariah
 from .jago.Jago import Jago
+from .bankmas.Bankmas import Bankmas
+from .superbank.Superbank import Superbank
+from .bankmandiritaspen.Bankmandiritaspen import Bankmandiritaspen
+from .victoriabank.Victoriabank import Victoriabank

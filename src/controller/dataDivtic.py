@@ -1,6 +1,7 @@
 import os
 import click
 import asyncio
+import settings
 
 from click.core import Context
 from time import perf_counter
@@ -17,6 +18,8 @@ class DataDivtic:
     @click.option('--kafka', '-s3', is_flag=True, default=False)
     @click.option('--thread', '-th',  is_flag=True, default=False)
     @click.option('--save', '-sv',  is_flag=True, default=False)
+    @click.option('--beanstalk-host', '-bh', default=settings.BEANSTALK["host"])
+    @click.option('--beanstalk-port', '-bh', default=settings.BEANSTALK["port"])
     @click.pass_context
     def task(ctx: Context, **kwargs):
         ctx.obj = kwargs
@@ -83,5 +86,48 @@ class DataDivtic:
 
         dephub = Dephub(ctx.obj)
         dephub.main()
+
+        ...
+        
+    @staticmethod
+    @task.command('sipsn')
+    @click.pass_context
+    def sipsn(ctx: Context) -> None:
+
+        sipsn = Sipsn(ctx.obj)
+        sipsn.main()
+
+        ...
+        
+    @staticmethod
+    @task.command('bpsPublikasi')
+    @click.pass_context
+    def bpsPublikasi(ctx: Context) -> None:
+
+        bpsPublikasi = BpsPublikasi(ctx.obj)
+        bpsPublikasi.main()
+
+        ...
+        
+    @staticmethod
+    @task.command('kkp')
+    @click.pass_context
+    def kkp(ctx: Context) -> None:
+
+        kkp = Kkp(ctx.obj)
+        kkp.main()
+
+        ...
+        
+    @staticmethod
+    @task.command('bi')
+    @click.option('--mode', '-m', help='insert mode')
+    @click.option('--url', '-u', help='insert url')
+    @click.option('--category', '-c', help='insert category')
+    @click.pass_context
+    def bi(ctx: Context, **kwargs) -> None:
+
+        bi = BI(ChainMap(ctx.obj, kwargs))
+        bi.main()
 
         ...

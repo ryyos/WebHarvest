@@ -453,3 +453,43 @@ class DataAdmiralty:
         jago.main()
         
         ...
+        
+    @staticmethod
+    @task.command('bankmas')
+    @click.pass_context
+    def bankmas(ctx: Context) -> None:
+        
+        bankmas = Bankmas(ctx.obj)
+        bankmas.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('superbank')
+    @click.pass_context
+    def superbank(ctx: Context) -> None:
+        
+        superbank = Superbank(ctx.obj)
+        superbank.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('bankmandiritaspen')
+    @click.pass_context
+    def bankmandiritaspen(ctx: Context) -> None:
+        
+        bankmandiritaspen = Bankmandiritaspen(ctx.obj)
+        bankmandiritaspen.main()
+        
+        ...
+        
+    @staticmethod
+    @task.command('victoriabank')
+    @click.pass_context
+    def victoriabank(ctx: Context) -> None:
+        
+        victoriabank = Victoriabank(ctx.obj)
+        victoriabank.main()
+        
+        ...

@@ -18,6 +18,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         self.dones: List[str] = File.read_list_json(self.path_done)
 
         self.__topic: str = options["topic"]
+        self.__bootstrap: str = options["bootstrap"]
         self.__save: str = options["save"]
         self.__kafka: str = options["kafka"]
         self.__mode: str = options["mode"]
@@ -179,28 +180,32 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         ...
 
     async def get_photo_v2(self, page: Page) -> List[str]:
-        all_button = await page.query_selector_all('div[jsname="t1pjHf"] div[jsname="oZzHLe"]')
-        for button in all_button:
-            classe: str = await button.evaluate('(element) => element.getAttribute("class")')
-            while True:
-                await button.click()
-                await sleep(5)
-                classe: str = await button.evaluate('(element) => element.getAttribute("class")')
-                if 'eLNT1d' in classe: break
-                html: PyQuery = PyQuery(await page.content())
-                Stream.found(process='PHOTO', message='FOUNDED', total=len(html.find('div[class="M3UVH"] img')))
-                
-                break
-            break
+        
+        try:
+            async with asyncio.timeout(7200):
+                all_button = await page.query_selector_all('div[jsname="t1pjHf"] div[jsname="oZzHLe"]')
+                for button in all_button:
+                    classe: str = await button.evaluate('(element) => element.getAttribute("class")')
+                    while True:
+                        await button.click()
+                        await sleep(5)
+                        classe: str = await button.evaluate('(element) => element.getAttribute("class")')
+                        if 'eLNT1d' in classe: break
+                        html: PyQuery = PyQuery(await page.content())
+                        Stream.found(process='PHOTO', message='FOUNDED', total=len(html.find('div[class="M3UVH"] img')))
             
-        html: PyQuery = PyQuery(await page.content())
+        except Exception:
+            ...
+        
+        finally: 
+            photos: List[str] = []
+            html: PyQuery = PyQuery(await page.content())
 
-        photos: List[str] = []
-        for img in html.find('div[class="M3UVH"] img'):
-            if not self.check_url(PyQuery(img).attr('src')): continue
-            photos.append(self.check_url(PyQuery(img).attr('src')))
+            for img in html.find('div[class="M3UVH"] img'):
+                if not self.check_url(PyQuery(img).attr('src')): continue
+                photos.append(self.check_url(PyQuery(img).attr('src')))
 
-        return photos
+            return photos
         ...
 
     async def price(self, page: Page) -> Dict[str, any]:
@@ -319,60 +324,74 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
         
         index_done = 0
         while not bottom:
-            html: PyQuery = PyQuery(await page.content())
-            scroll_height = await page.evaluate("document.body.scrollHeight")
-            current_height = await page.evaluate("window.scrollY + window.innerHeight")
+            try:
+                
+                '''
+                * Untuk menghandle jika code mengalami stuck selama 2 jam
+                * 'asyncio.timeout(7200)'
+                '''
+                
+                async with asyncio.timeout(7200):
+                    html: PyQuery = PyQuery(await page.content())
+                    current_height = await page.evaluate("document.body.scrollHeight")
+                    scroll_height = await page.evaluate("window.scrollY + window.innerHeight")
 
-            for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
-                index_done+=1
-                time_epoch: int = Time.convert_time(Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()))
-                
-                if time_epoch < self.choice_mode(self.__mode): 
-                    bottom = True
-                    break
-                
-                Stream.found(process='REVIEWS', message='FOUNDED', total=index_done)
-                
-                yield {
-                    "id_review": Endecode.md5_hash(PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text()),
-                    "username_reviews": PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text() \
-                        or PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] span.faBUBf').text(),
-                    "image_reviews": PyQuery(review).find('div[class="jUkSGf WwUTAf"] img').attr('src'),
-                    "created_time": Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()),
-                    "created_time_epoch": time_epoch,
-                    "reviews_rating": PyQuery(review).find('div[class="GDWaad"]').text(),
-                    "detail_reviews_rating": [
-                        {
-                            "score_rating": PyQuery(tag).find('span').eq(-1).text(),
-                            "category_rating": PyQuery(tag).find('span').eq(0).text(),
-                        } for tag in PyQuery(review).find('div[class="dA5Vzb"]')
-                    ],
-                    "tags_review": list(PyQuery(review).find('div[class="ThUm5b"]').text().split(' ❘ ')),
-                    "content_reviews": PyQuery(review).find('div[class="STQFb eoY5cb"] div[class="K7oBsc"]').text(),
-                    "reply_content_reviews": {
-                        "username_reply_reviews": val(PyQuery(review).find('div.lU7Ape div.n7uVJf > span').eq(0).text()),
-                        "content_reviews": '\n'.join(val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()).split('\n')[1:])\
-                            if val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()) else None
-                    },
-                    "media_reviews": [
-                        PyQuery(img).find('img').attr('data-src') or PyQuery(img).find('img').attr('src') for img in PyQuery(review).find('div[class="fBMzfe"] div[jsname="o8HAFf"]')
-                    ]
-                }
-                ...
+                    for review in html.find('div[jsname="Pa5DKe"] div[class="Svr5cf bKhjM"]')[index_done:]:
+                        index_done+=1
+                        time_epoch: int = Time.convert_time(Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()))
+                        
+                        if time_epoch < self.choice_mode(self.__mode): 
+                            bottom = True
+                            break
+                        
+                        Stream.found(process='REVIEWS', message='FOUNDED', total=index_done)
+                        
+                        yield {
+                            "id_review": Endecode.md5_hash(PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text()),
+                            "username_reviews": PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] > a').text() \
+                                or PyQuery(review).find('div[class="aAs4ib"] span[class="k5TI0"] span.faBUBf').text(),
+                            "image_reviews": PyQuery(review).find('div[class="jUkSGf WwUTAf"] img').attr('src'),
+                            "created_time": Time.relative2date(PyQuery(review).find('span[class="iUtr1 CQYfx"]').text()),
+                            "created_time_epoch": time_epoch,
+                            "reviews_rating": PyQuery(review).find('div[class="GDWaad"]').text(),
+                            "detail_reviews_rating": [
+                                {
+                                    "score_rating": PyQuery(tag).find('span').eq(-1).text(),
+                                    "category_rating": PyQuery(tag).find('span').eq(0).text(),
+                                } for tag in PyQuery(review).find('div[class="dA5Vzb"]')
+                            ],
+                            "tags_review": list(PyQuery(review).find('div[class="ThUm5b"]').text().split(' ❘ ')),
+                            "content_reviews": PyQuery(review).find('div[class="STQFb eoY5cb"] div[class="K7oBsc"]').text(),
+                            "reply_content_reviews": {
+                                "username_reply_reviews": val(PyQuery(review).find('div.lU7Ape div.n7uVJf > span').eq(0).text()),
+                                "content_reviews": '\n'.join(val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()).split('\n')[1:])\
+                                    if val(PyQuery(review).find('div.lU7Ape div.n7uVJf').text()) else None
+                            },
+                            "media_reviews": [
+                                PyQuery(img).find('img').attr('data-src') or PyQuery(img).find('img').attr('src') for img in PyQuery(review).find('div[class="fBMzfe"] div[jsname="o8HAFf"]')
+                            ]
+                        }
+                        ...
+                    
+                    if scroll_height >= current_height:
+                        bottom = True
+                    elif bottom:
+                        break
+                    else:
+                        while True:
+                            await page.keyboard.press("ArrowDown")
+                            await sleep(0.5)
+                            new_current_height = await page.evaluate("window.scrollY + window.innerHeight")
+                            Stream.one(process='REVIEWS', message='SCROLL DOWN', value=f'{new_current_height} | {current_height}')
+                            if new_current_height >= scroll_height: break
+                            scroll_height = new_current_height
+                    ...
+            except asyncio.TimeoutError:
+                raise Exception('CODE STUCK TIMEOUT')
             
-            if current_height >= scroll_height:
-                bottom = True
-            elif bottom:
-                break
-            else:
-                while True:
-                    await page.keyboard.press("ArrowDown")
-                    await sleep(0.5)
-                    new_current_height = await page.evaluate("window.scrollY + window.innerHeight")
-                    Stream.one(process='REVIEWS', message='SCROLL DOWN', value=f'{new_current_height} | {scroll_height}')
-                    if new_current_height >= current_height: break
-                    current_height = new_current_height
-            ...
+            except Exception as err:
+                raise Exception(str(err))
+                ...
         ...
 
     async def extract_hotel(self, url: str, browser: BrowserContext) -> None:
@@ -418,7 +437,7 @@ class GoogleReviewsLibs(GoogleReviewsComponent):
                 total_photos = len(photos)
                 
                 if self.__save: File.write_json(f'data/data_raw/icc/google-reviews/{meta["name"]}/json/{review["id_review"]}.json', result)
-                if self.__kafka: Kafkaa.send(result, self.__topic)
+                if self.__kafka: Kafkaa.send(result, self.__topic, self.__bootstrap)
 
             self.dones.append(meta['id'])
             if self.__mode == 'all': File.write_json(self.path_done, self.dones)

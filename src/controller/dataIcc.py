@@ -28,6 +28,7 @@ class DataIcc:
     @click.option('--worker', '-w', required=True, help='insert count worker')
     @click.option('--mode', '-m', required=True, help='mode all or stream')
     @click.option('--topic', '-t', required=False, help='topic for kafka')
+    @click.option('--bootstrap', '-b', required=True, help='bootstrap for kafka')
     @click.option('--headless', '-h', is_flag=True, default=False, help='headless playwright or not')
     @click.pass_context
     def google(ctx: Context, **kwargs) -> None:

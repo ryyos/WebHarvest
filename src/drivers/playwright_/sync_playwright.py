@@ -1,7 +1,7 @@
 import asyncio
 
 from icecream import ic
-from playwright.sync_api import sync_playwright, BrowserContext, Browser, Page
+from playwright.sync_api import sync_playwright, BrowserContext, Browser, Page, ElementHandle
 from time import sleep
 
 class SyncPlaywright:
@@ -15,7 +15,7 @@ class SyncPlaywright:
 
     def start(self) -> BrowserContext:
         self.playwright = sync_playwright().start()
-        self.chrome: Browser = self.playwright.chromium.launch(headless=self.headless, args=['--window-position=-8,-2'])
+        self.chrome: Browser = self.playwright.firefox.launch(headless=self.headless, args=['--window-position=-8,-2'])
         self.browsers: BrowserContext = self.chrome.new_context()
         return self.browsers
     

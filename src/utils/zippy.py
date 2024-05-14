@@ -66,7 +66,6 @@ class Zip:
         try:
             with zipfile.ZipFile(source, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir.replace('\\', '/'))
-                
             ...
         except Exception:
             ...

@@ -2,7 +2,7 @@ from typing import Any, Callable, Tuple
 from time import perf_counter
 from functools import wraps
 
-from src.utils import Stream
+from .stream import Stream
 class Annotations:
 
     @staticmethod

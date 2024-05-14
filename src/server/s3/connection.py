@@ -7,7 +7,6 @@ from botocore.config import Config
 from dotenv import *
 from json import dumps
 from icecream import ic
-from src.utils import Stream
 
 class ConnectionS3:
     def __init__(self) -> None:

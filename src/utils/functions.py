@@ -1,6 +1,6 @@
 import shutil
 
-from src.utils import Dir
+from .directory import Dir
 class Funct:
 
     @staticmethod

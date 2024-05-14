@@ -2,7 +2,7 @@ import json
 import os
 
 from typing import List
-from src.utils import Dir
+from .directory import Dir
 
 
 class File:
@@ -38,7 +38,7 @@ class File:
     def write_byte(path: str, media: any) -> None:
         Dir.create_dir(Dir.basedir(path))
         with open(path, 'wb') as file:
-            file.write(media.content)
+            file.write(media)
         ...
 
     @staticmethod
@@ -48,6 +48,18 @@ class File:
             data = json.load(file)
         return data
         ...
+        
+    @staticmethod
+    def read(path: str) -> any:
+        with open(path, 'r', encoding='utf-8') as file:
+            html_content = file.read()
+            
+        return html_content
+    def read_byte(path: str) -> any:
+        with open(path, "rb") as file:
+            download_bytes = file.read()
+            
+        return download_bytes
 
     @staticmethod
     def read_list_json(path: str):

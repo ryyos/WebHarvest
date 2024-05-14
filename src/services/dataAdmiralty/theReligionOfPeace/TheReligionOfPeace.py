@@ -67,7 +67,7 @@ class TheReligionOfPeace(TheReligionOfPeaceLibs):
             if self.__save:
                 File.write_json(path, results)
             if self.__kafka:
-                Kafkaa.send(results, self.__topic)
+                Kafkaa.send(results, self.__topic, 'research_ai')
 
         Stream.found(
             process='STREAM',

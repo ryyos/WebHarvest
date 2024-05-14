@@ -4,3 +4,7 @@ from .unodc.Unodc import Unodc
 from .worldbank.Worldbank import Worldbank
 from .ahugoid.Ahugoid import Ahugoid
 from .dephub.Dephub import Dephub
+from .sipsn.Sipsn import Sipsn
+from .bps_publikasi.BpsPublikasi import BpsPublikasi
+from .kkp.Kkp import Kkp
+from .bi.BI import BI
